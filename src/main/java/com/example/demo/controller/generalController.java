@@ -4,23 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,11 +35,7 @@ import com.example.demo.service.ObjetoService;
 import com.example.demo.service.PlanoOrcamentarioService;
 import com.example.demo.service.UnidadeOrcamentariaService;
 
-import io.netty.handler.logging.LogLevel;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -83,7 +73,7 @@ public class generalController {
             }
 
             consumirPlanilha(mapValue);
-            // salvarDadosNoBanco();
+            salvarDadosNoBanco();
             
             return ResponseEntity.ok("Concluido");
         } catch(FileNotFoundException ex) {
@@ -140,12 +130,12 @@ public class generalController {
             Ano ano2025 = anoService.findOrCreate("2025");
 
             //criar execussões
-            ExecucaoOrcamentaria execCaixa2025 = new ExecucaoOrcamentaria(ano2025, investimento,
+            ExecucaoOrcamentaria execCaixa2025 = ExecucaoOrcamentaria.criar(ano2025, investimento,
                 valorToDouble(linha.get(12)), 0, fonteCaixa);
 
             execCaixa2025 = execucaoOrcamentariaService.setValores(execCaixa2025);
 
-            ExecucaoOrcamentaria execDemais2025 = new ExecucaoOrcamentaria(ano2025, investimento,
+            ExecucaoOrcamentaria execDemais2025 = ExecucaoOrcamentaria.criar(ano2025, investimento,
                 valorToDouble(linha.get(21)), 0, fonteDemais);
 
             execDemais2025 = execucaoOrcamentariaService.setValores(execDemais2025);
@@ -189,15 +179,15 @@ public class generalController {
 
     }
 
-    // private void salvarDadosNoBanco(){
-    //     Logger.getGlobal().info("Efetivando a migração!!");
-    //     // for(int i = 0; i < DataMock.noCustos.size(); i++){
-    //     //     Logger.getGlobal().info("Efetivando: " + (i+1) + "/" + DataMock.noCustos.size());
-    //     //     custoService.save(DataMock.noCustos.get(i));
-    //     // }
+    private void salvarDadosNoBanco(){
+        Logger.getGlobal().info("Efetivando a migração!!");
+        for(int i = 0; i < DataMock.noCustos.size(); i++){
+            Logger.getGlobal().info("Efetivando: " + (i+1) + "/" + DataMock.noCustos.size());
+            custoService.saveReal(DataMock.noCustos.get(i));
+        }
 
-    //     custoService.saveAll(DataMock.noCustos);
-    // }
+        // custoService.saveReal(DataMock.noCustos);
+    }
 
     private double valorToDouble(String valor) {
         if(valor.contains("-"))

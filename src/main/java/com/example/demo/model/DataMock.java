@@ -2,8 +2,6 @@ package com.example.demo.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class DataMock {
@@ -13,6 +11,7 @@ public class DataMock {
 
     public static boolean populado = false;
 
+    public static ArrayList<Ano> noAnos = new ArrayList<>();
     public static ArrayList<Custo> noCustos = new ArrayList<>();
     public static ArrayList<Objeto> noObjetos = new ArrayList<>();
     public static ArrayList<Investimento> noInvestimentos = new ArrayList<>();

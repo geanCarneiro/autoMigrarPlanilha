@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Ano;
@@ -14,8 +13,7 @@ import com.example.demo.repository.ExecucaoOrcamentariaRepository;
 @Service
 public class ExecucaoOrcamentariaService {
     
-    @Autowired
-    private ExecucaoOrcamentariaRepository repository;
+    private ExecucaoOrcamentariaRepository repository = new ExecucaoOrcamentariaRepository();
 
     public ExecucaoOrcamentaria findOrCreate(Ano ano, Conta conta, FonteOrcamentaria fonte){
         

@@ -8,14 +8,22 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Custo;
 import com.example.demo.repository.CustoRepository;
+import com.example.demo.repository.CustoRepositoryReal;
 
 @Service
 public class CustoService {
+    
+    private CustoRepository repository = new CustoRepository();
+
     @Autowired
-    private CustoRepository repository;
+    private CustoRepositoryReal repReal;
 
     public void saveAll(List<Custo> custos) {
         repository.saveAll(custos);
+    }
+
+    public Custo saveReal(Custo custos){
+        return repReal.save(custos);
     }
 
     

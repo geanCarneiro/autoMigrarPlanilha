@@ -1,10 +1,6 @@
 package com.example.demo.model;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
@@ -71,44 +67,13 @@ public class ExecucaoOrcamentaria extends Entidade implements Serializable {
         this.fonteOrcamentariaVinculadora = fonte;
     }
 
-    public static List<ExecucaoOrcamentaria> gerarExecucoes(PlanoOrcamentario po, Conta conta){
-        ArrayList<ExecucaoOrcamentaria> execucoes = new ArrayList<>();
-        String ano = String.valueOf(LocalDate.now().getYear()+1);
+    public static ExecucaoOrcamentaria criar(Ano ano, Conta contaDelimitada, double orcamento, double autorizado, FonteOrcamentaria fonte){
+        ExecucaoOrcamentaria exec = new ExecucaoOrcamentaria(ano, contaDelimitada, orcamento, autorizado, fonte);
+        
+        contaDelimitada.getExecucoesOrcamentariaDelimitadores().add(exec);
 
-        
-        return execucoes;
-    }
+        return exec;
 
-    public static ExecucaoOrcamentaria criar(String ano, PlanoOrcamentario po, UnidadeOrcamentaria uo, Conta conta){
-        ExecucaoOrcamentaria novo = new ExecucaoOrcamentaria(ano, po, uo, conta);
-        ArrayList<ExecucaoOrcamentaria> execucoes;
-        if(conta.getExecucoesOrcamentariaDelimitadores() == null)
-            execucoes = new ArrayList<>();
-        else
-            execucoes = new ArrayList<>(conta.getExecucoesOrcamentariaDelimitadores());
-        
-        execucoes.add(novo);
-        
-        conta.setExecucoesOrcamentariaDelimitadores(execucoes);
-        
-        DataMock.noExecucaoOrcamentarias.add(novo);
-        return novo;
-    }
-
-    public static ExecucaoOrcamentaria findOrCreate(String ano, PlanoOrcamentario po, UnidadeOrcamentaria uo, Conta conta){
-        List<ExecucaoOrcamentaria> result = DataMock.noExecucaoOrcamentarias.stream()
-            .filter(exec -> {
-                return exec.anoExercicio.getAno().equals(ano)
-                    && exec.contaDelimitada.equals(conta);
-            }).toList();
-        
-        if(result.isEmpty()) {
-            ExecucaoOrcamentaria nova = criar(ano, po, uo, conta);
-            ((ArrayList<ExecucaoOrcamentaria>) conta.getExecucoesOrcamentariaDelimitadores()).add(nova);
-            return nova;
-        } else {
-            return result.get(0);
-        }
     }
 
 }

@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Investimento;
@@ -13,8 +12,7 @@ import com.example.demo.repository.InvestimentoRepository;
 @Service
 public class InvestimentoService {
     
-    @Autowired
-    private InvestimentoRepository repository;
+    private InvestimentoRepository repository = new InvestimentoRepository();
 
     public Investimento findOrCreate(String nome, UnidadeOrcamentaria unidade, PlanoOrcamentario plano){
         Optional<Investimento> result = repository.findByFilter(unidade, plano);
@@ -25,5 +23,6 @@ public class InvestimentoService {
             return repository.save(new Investimento(nome, unidade, plano));
         }
     }
+
 
 }

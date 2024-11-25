@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.neo4j.core.schema.Node;
@@ -28,6 +29,6 @@ public class Conta extends Entidade implements Serializable {
     private List<Objeto> objetosCusteadores;
 
     @Relationship(type = "DELIMITA", direction = Direction.INCOMING)
-    private List<ExecucaoOrcamentaria> execucoesOrcamentariaDelimitadores;
+    private ArrayList<ExecucaoOrcamentaria> execucoesOrcamentariaDelimitadores = new ArrayList<>();
 
 }

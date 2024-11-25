@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.PlanoOrcamentario;
@@ -12,8 +11,7 @@ import com.example.demo.repository.UnidadeOrcamentariaRepository;
 @Service
 public class UnidadeOrcamentariaService {
     
-    @Autowired
-    private UnidadeOrcamentariaRepository repository;
+    private UnidadeOrcamentariaRepository repository = new UnidadeOrcamentariaRepository();
 
     public UnidadeOrcamentaria findOrCreate(Long codigo, String sigla, PlanoOrcamentario plano){
         

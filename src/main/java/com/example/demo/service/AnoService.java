@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Ano;
@@ -11,8 +10,7 @@ import com.example.demo.repository.AnoRepository;
 @Service
 public class AnoService {
     
-    @Autowired
-    private AnoRepository repository;
+    private AnoRepository repository = new AnoRepository();
 
     public Ano findOrCreate(String ano){
 

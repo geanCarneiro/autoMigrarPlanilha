@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.PlanoOrcamentario;
@@ -11,8 +10,7 @@ import com.example.demo.repository.PlanoOrcamentarioRepository;
 @Service
 public class PlanoOrcamentarioService {
     
-    @Autowired
-    private PlanoOrcamentarioRepository repository;
+    private PlanoOrcamentarioRepository repository = new PlanoOrcamentarioRepository();
 
     public PlanoOrcamentario findOrCreate(Long codPlano, String nomePlano) {
         
