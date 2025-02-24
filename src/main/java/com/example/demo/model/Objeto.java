@@ -1,19 +1,27 @@
 package com.example.demo.model;
 
 import java.io.Serializable;
+import java.security.cert.CertPath;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
+import com.example.demo.dto.ObjetoDto;
+import com.example.demo.dto.projection.ObjetoTiraProjection;
+
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Node
 public class Objeto extends Entidade implements Serializable {
     
@@ -21,30 +29,107 @@ public class Objeto extends Entidade implements Serializable {
     private String descricao;
     private String tipo;
     private int openPMOId;
-    private String status;
+    private String infoComplementares;
+    private String contrato;
 
-    @Relationship(type = "CUSTEADO", direction = Direction.OUTGOING)
-    private Conta contaCusteada;
+    @Relationship(type = "EM")
+    private EmStatus emStatus;
+
+    @Relationship(type = "EM")
+    private EmEtapa emEtapa;
+
+    @Relationship(type = "SOBRE", direction = Direction.OUTGOING)
+    private AreaTematica areaTematica;
+
+    @Relationship(type = "DO_TIPO", direction = Direction.OUTGOING)
+    private List<TipoPlano> tiposPlano;
+
+    @Relationship(type = "RESPONSAVEL_POR", direction = Direction.INCOMING)
+    private Usuario responsavel;
 
     @Relationship(type = "ESTIMADO", direction = Direction.INCOMING)
     private ArrayList<Custo> custosEstimadores = new ArrayList<>();
 
-    public Objeto(String nome, String tipo, Conta contaCusteada) {
-        this.nome = nome;
-        this.tipo = tipo;
-        this.contaCusteada = contaCusteada;
+    @Relationship(type = "ATENDE", direction = Direction.OUTGOING)
+    private Localidade microrregiao;
+
+    @Relationship(type = "CUSTEADO")
+    private Conta conta;
+
+    @Relationship("POSSUI")
+    private List<Apontamento> apontamentos;
+
+    @Relationship("POSSUI")
+    private List<Parecer> pareceres;
+
+
+    public Objeto(ObjetoDto dto) {
+        this.setId(dto.id());
+        this.nome = dto.nome();
+        this.descricao = dto.descricao();
+        this.tipo = dto.tipo();
+        this.emStatus = EmStatus.parse(dto.emStatus());
+        this.emEtapa = EmEtapa.parse(dto.emEtapa());
+        this.conta = Conta.parse(dto.conta());
+        
+        this.infoComplementares = dto.infoComplementares();
+        this.contrato = dto.contrato();
+
+        this.areaTematica = dto.areaTematica() == null ? null : new AreaTematica(dto.areaTematica());
+        this.tiposPlano = dto.planos() == null ? null : dto.planos().stream().map(tipoDto -> new TipoPlano(tipoDto)).toList();
+        this.responsavel = dto.responsavel() == null ? null : new Usuario(dto.responsavel());
+        this.custosEstimadores = new ArrayList<>(dto.recursosFinanceiros().stream().map(custoDto -> new Custo(custoDto)).toList());
+        this.microrregiao = dto.microregiaoAtendida() == null ? null : new Localidade(dto.microregiaoAtendida());
+        this.apontamentos = dto.apontamentos() == null ? null : dto.apontamentos().stream().map(Apontamento::parse).toList();
+        this.pareceres = dto.pareceres() == null ? null : dto.pareceres().stream().map(Parecer::parse).toList();
+        
+    }
+    
+    public void filtrar(Integer anoExercicio, String fonteId) {
+        
+
+        if(anoExercicio != null){
+            List<Custo> custos = this.getCustosEstimadores();
+            custos = custos.stream().filter(custo -> custo.getAnoExercicio().equals(anoExercicio)).toList();
+            this.setCustosEstimadores(new ArrayList<>(custos));
+        }
+
+        if(fonteId != null){
+            for(Custo custo : this.getCustosEstimadores()) {
+
+                custo.setIndicadaPor(
+                    custo.getIndicadaPor().stream()
+                    .filter(ip -> ip.getFonteOrcamentaria().getId().equals(fonteId) )
+                    .collect(Collectors.toSet())
+                );
+
+            }
+
+        }
+        
+        conta.filtrarExecucoes(anoExercicio, fonteId);
     }
 
-    public Objeto(String nome, String descricao, String tipo, Conta contaCusteada) {
-        this(nome, tipo, contaCusteada);
-        this.descricao = descricao;
+    public static Objeto parse(ObjetoTiraProjection projection) {
+        if(projection == null)
+            return null;
+
+        Objeto obj = new Objeto();
+        obj.setId(projection.getId());
+        obj.setNome(projection.getNome());
+        obj.setTipo(projection.getTipo());
+        obj.setEmStatus(projection.getEmStatus());
+        obj.setEmEtapa(EmEtapa.parse(projection.getEmEtapa()));
+        obj.setCustosEstimadores(projection.getCustosEstimadores());
+        obj.setConta(projection.getConta());
+
+        return obj;
     }
 
-    public static Objeto criar(String nome, String descricao, String tipo, Conta conta){
-        Objeto novo = new Objeto(nome, tipo, conta);
-        novo.setDescricao(descricao);
-        DataMock.noObjetos.add(novo);
-        return novo;
+    public static Objeto parse(ObjetoDto dto) {
+        return dto == null ? null
+        : new Objeto(dto);
     }
+
 
 }

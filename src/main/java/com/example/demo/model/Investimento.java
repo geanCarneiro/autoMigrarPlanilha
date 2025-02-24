@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import java.util.List;
+
 import org.springframework.data.neo4j.core.schema.Node;
 
 import lombok.NoArgsConstructor;
@@ -8,20 +10,8 @@ import lombok.NoArgsConstructor;
 @Node
 public class Investimento extends Conta{
     
-    public Investimento(String nome) {
-        super.setNome(nome);
-    }
-
-    public Investimento(String nome, UnidadeOrcamentaria unidade, PlanoOrcamentario plano) {
-        super.setNome(nome);
-        super.setUnidadeOrcamentariaImplementadora(unidade);
-        super.setPlanoOrcamentarioOrientador(plano);
-    }
-
-    public static Investimento criar(String nome){
-        Investimento novo = new Investimento(nome);
-        DataMock.noInvestimentos.add(novo);
-        return novo;
+    public Investimento(PlanoOrcamentario po, UnidadeOrcamentaria uo, List<ExecucaoOrcamentaria> execs){
+        super(po, uo, execs);
     }
 
 }

@@ -1,32 +1,61 @@
 package com.example.demo.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.PlanoOrcamentario;
+import com.example.demo.dto.projection.UnidadeOrcamentariaDTOProjection;
 import com.example.demo.model.UnidadeOrcamentaria;
 import com.example.demo.repository.UnidadeOrcamentariaRepository;
+
 
 @Service
 public class UnidadeOrcamentariaService {
     
-    private UnidadeOrcamentariaRepository repository = new UnidadeOrcamentariaRepository();
+    @Autowired
+    private UnidadeOrcamentariaRepository repository;
 
-    public UnidadeOrcamentaria findOrCreate(Long codigo, String sigla, PlanoOrcamentario plano){
+    public void saveAll(List<UnidadeOrcamentaria> unidades) {
+        repository.saveAll(unidades);
+    }
+
+    public List<UnidadeOrcamentaria> getAll() {
+        return repository.findAll();
+    }
+
+    public List<UnidadeOrcamentariaDTOProjection> getAllSimples() {
+        return repository.findAllUnidades();
+    }
+
+    public String getCodById(String idUnidade) {
+        return repository.getCodById(idUnidade);
+    }
+
+    public UnidadeOrcamentaria findOrCreateByCod(UnidadeOrcamentaria unidade){
         
-        Optional<UnidadeOrcamentaria> result = repository.findByCodigo(codigo);
-        UnidadeOrcamentaria unidade;
+        UnidadeOrcamentaria probe = new UnidadeOrcamentaria();
+        probe.setCodigo(unidade.getCodigo());
 
-        if(result.isPresent()) {
-            unidade = result.get();
-        } else {
-            unidade = new UnidadeOrcamentaria(codigo, sigla);
-        }
+        Optional<UnidadeOrcamentaria> optUnidade = repository.findBy(Example.of(probe), query -> query.first());
 
-        unidade.addPlanoSeNaoExistir(plano);
+        return optUnidade.orElse(unidade);
+    }
 
-        return repository.save(unidade);
+    public UnidadeOrcamentaria findBySigla(String sigla) {
+
+        UnidadeOrcamentaria probe = new UnidadeOrcamentaria();
+        probe.setSigla(sigla);
+
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                    .withIgnoreCase("sigla");
+
+        return this.repository.findBy(Example.of(probe, matcher), query -> query.firstValue());
+
     }
 
 }

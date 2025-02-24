@@ -1,49 +1,67 @@
 package com.example.demo.service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.ValoresCusto;
 import com.example.demo.model.Custo;
+import com.example.demo.model.IndicadaPor;
+import com.example.demo.model.Objeto;
 import com.example.demo.repository.CustoRepository;
-import com.example.demo.repository.CustoRepositoryReal;
+
 
 @Service
 public class CustoService {
     
-    private CustoRepository repository = new CustoRepository();
-
     @Autowired
-    private CustoRepositoryReal repReal;
+    private CustoRepository repository;
+
+    private ObjetoService objetoService;
+
 
     public void saveAll(List<Custo> custos) {
         repository.saveAll(custos);
     }
 
-    public Custo saveReal(Custo custos){
-        return repReal.save(custos);
+    public List<Custo> getAllByExercicio(String exercicio){
+        return repository.findByExercicio(exercicio);
+    }
+
+    public ValoresCusto getValoresTotais(String nome, String idFonte, Integer exercicio, String idUnidade, String idPlano){
+       
+        List<Objeto> objetosPorFiltro = objetoService.getAllListByFilter(exercicio, nome, idUnidade, idPlano, null, null, null);
+
+        objetosPorFiltro = objetosPorFiltro.stream().filter(obj -> obj.getEmEtapa() == null).toList();
+        
+        Double totalPrevisto = 0d;
+        Double totalContratado = 0d;
+
+        for(Objeto objeto : objetosPorFiltro){
+
+            for(Custo custo : objeto.getCustosEstimadores()){
+
+                for(IndicadaPor indicadaPor: custo.getIndicadaPor()){
+
+                    totalPrevisto += indicadaPor.getPrevisto();
+                    totalContratado += indicadaPor.getContratado();  
+                }
+
+            }
+
+        }
+
+        return new ValoresCusto(totalPrevisto, totalContratado);
+    }
+
+    @Autowired
+    public void setObjetoService(ObjetoService objetoService) {
+        this.objetoService = objetoService;
     }
 
     
-    public Custo save(Custo custos) {
-        return repository.save(custos);
-    }
 
-    public Custo findOrCreate(Custo _custo) {
-        Optional<Custo> result = repository.findByFilter(_custo.getAnoExercicio(), _custo.getObjetoEstimado(), _custo.getFonteOrcamentariaIndicadora());
 
-        Custo custo;
-        if(result.isPresent()) {
-            custo = result.get();
-
-            custo.setPrevisto(_custo.getPrevisto());
-            custo.setContratado(_custo.getContratado());
-            
-        } else {
-            custo = _custo;
-        }
-        return repository.save(custo);
-    }
 }

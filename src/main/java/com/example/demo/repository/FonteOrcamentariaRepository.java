@@ -1,29 +1,21 @@
 package com.example.demo.repository;
 
 import java.util.List;
-import java.util.Optional;
 
-import com.example.demo.model.DataMock;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.query.Query;
+
 import com.example.demo.model.FonteOrcamentaria;
 
-//public interface FonteOrcamentariaRepository extends Neo4jRepository<FonteOrcamentaria, String> {
-public class FonteOrcamentariaRepository{ // extends Neo4jRepository<FonteOrcamentaria, String> {
+
+public interface FonteOrcamentariaRepository extends Neo4jRepository<FonteOrcamentaria, String>{
     
-    // @Query("MATCH (execucao:ExecucaoOrcamentaria)<-[vincula:VINCULA]-(fonte:FonteOrcamentaria)-[indicada:INDICADA]->(custo:Custo)\r\n" + //
-    //         "WHERE fonte.codigo = $codigo\r\n" + //
-    //         "RETURN fonte, collect(custo), collect(indicada), collect(vincula), collect(execucao)")
-    public Optional<FonteOrcamentaria> findByCodigo(Long codigo){
-        List<FonteOrcamentaria> result = DataMock.noFonteOrcamentarias.stream()
-                                            .filter(fonte -> fonte.getCodigo().equals(codigo)).toList();
+    @Query("MATCH (fonte:FonteOrcamentaria) WHERE fonte.codigo = $codigo RETURN fonte")
+    public FonteOrcamentaria findByCodigo(String codigo);
 
-        return result.isEmpty() ? Optional.empty() : Optional.ofNullable(result.get(0));
-    }
-
-    public FonteOrcamentaria save(FonteOrcamentaria fonteOrcamentaria) {
-        // TODO Auto-generated method stub
-        fonteOrcamentaria.setId(String.valueOf(DataMock.noFonteOrcamentarias.size()));
-        DataMock.noFonteOrcamentarias.add(fonteOrcamentaria);
-        return fonteOrcamentaria;
-    }
+    @Query("MATCH (n:FonteOrcamentaria) \r\n" + //
+            "WHERE toInteger(n.codigo) < 1000\r\n" + //
+            "RETURN n")
+    public List<FonteOrcamentaria> findFontesExtra();
 
 }

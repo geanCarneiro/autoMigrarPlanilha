@@ -1,26 +1,36 @@
 package com.example.demo.service;
 
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.Ano;
-import com.example.demo.repository.AnoRepository;
+import com.example.demo.repository.CustoRepository;
+import com.example.demo.repository.ExecucaoOrcamentariaRepository;
+
 
 @Service
 public class AnoService {
     
-    private AnoRepository repository = new AnoRepository();
+    @Autowired
+    private CustoRepository custoRepository;
 
-    public Ano findOrCreate(String ano){
+    @Autowired
+    private ExecucaoOrcamentariaRepository execucaoOrcamentariaRepository;
 
-        Optional<Ano> result = repository.findByAno(ano);
+    public Set<Integer> getAllAnos() {
         
-        if(result.isPresent()) {
-            return result.get();
-        } else {
-            return repository.save(new Ano(ano));
-        }
+        Set<Integer> anosCusto = custoRepository.getAnosExercicio();
+        Set<Integer> anosExecucoes = execucaoOrcamentariaRepository.getAnosExercicio();
+
+        HashSet<Integer> todosAnos = new HashSet<>();
+
+        todosAnos.addAll(anosCusto);
+        todosAnos.addAll(anosExecucoes);
+
+        return todosAnos;
+
 
     }
 

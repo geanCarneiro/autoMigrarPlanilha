@@ -11,7 +11,8 @@ import lombok.Setter;
 public abstract class Entidade {
 
     @RelationshipId @GeneratedValue
-    private String id = "";
+    private String id;
+
       
     
 }
